@@ -1,0 +1,13 @@
+name: Hello World Pipeline
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Print Hello World
+        run: echo "Hello World"
