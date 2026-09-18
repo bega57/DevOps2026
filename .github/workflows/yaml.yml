@@ -1,0 +1,18 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - run: echo "Hello World"
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - run: docker run hello-world
