@@ -18,3 +18,8 @@ jobs:
             -w /project \
             -e GRADLE_USER_HOME=/project/.gradle-home \
             gradle:jdk17 gradle clean build --no-daemon
+      - name: Show artifacts
+        run: ls -la build/libs
+
+      - name: Build Docker image
+        run: docker build -t devops-app:latest .
