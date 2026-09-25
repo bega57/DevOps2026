@@ -17,4 +17,4 @@ jobs:
             -v "$PWD":/project \
             -w /project \
             -e GRADLE_USER_HOME=/project/.gradle-home \
-            gradle:jdk17 gradle tasks --no-daemon
+            gradle:jdk17 gradle clean build --no-daemon
