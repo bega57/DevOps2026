@@ -58,3 +58,10 @@ jobs:
             echo "Bekommen: $actual"
             exit 1
           fi
+
+      - name: Push image to registry
+        run: |
+          docker tag devops-app:latest 10.0.40.171:5000/team6/devops-app:latest
+          docker tag devops-app:latest 10.0.40.171:5000/team6/devops-app:${GITHUB_SHA::7}
+          docker push 10.0.40.171:5000/team6/devops-app:latest
+          docker push 10.0.40.171:5000/team6/devops-app:${GITHUB_SHA::7}
