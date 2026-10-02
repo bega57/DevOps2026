@@ -34,3 +34,27 @@ jobs:
             --restart unless-stopped \
             -p 8080:8080 \
             devops-app:latest
+
+      - name: Integration test
+        run: |
+          expected=$(cat integration-test/health-expected.json)
+
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/actuator/health > /dev/null; then
+              break
+            fi
+            echo "Warte auf App... ($i/30)"
+            sleep 2
+          done
+
+          actual=$(curl -sS http://localhost:8080/actuator/health)
+
+          if [ "$expected" == "$actual" ]; then
+            echo "Integrationstest OK"
+            exit 0
+          else
+            echo "Integrationstest FEHLGESCHLAGEN"
+            echo "Erwartet: $expected"
+            echo "Bekommen: $actual"
+            exit 1
+          fi
