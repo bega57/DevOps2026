@@ -4,11 +4,18 @@ on:
   push:
   workflow_dispatch:
 
+env:
+  REGISTRY_IMAGE: 10.0.40.171:5000/team6/devops-app
+  SONAR_HOST_URL: http://10.0.40.168:9000
+
 jobs:
   build:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set image tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
 
       - name: Gradle tasks
         run: |
@@ -20,10 +27,30 @@ jobs:
             gradle:jdk17 gradle clean build --no-daemon
 
       - name: Show artifacts
-        run: ls -la build/libs
+        run: |
+          ls -la build/libs
+          ls -la build/reports/jacoco/test
+
+      - name: SonarQube scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          docker run --rm \
+            -u $(id -u):$(id -g) \
+            -v "$PWD":/usr/src \
+            -e SONAR_HOST_URL \
+            -e SONAR_TOKEN \
+            -e SONAR_USER_HOME=/usr/src/.sonar \
+            sonarsource/sonar-scanner-cli \
+            -Dsonar.projectKey=devops-app-team6 \
+            -Dsonar.sources=src/main/java \
+            -Dsonar.tests=src/test/java \
+            -Dsonar.java.binaries=build/classes/java/main \
+            -Dsonar.java.test.binaries=build/classes/java/test \
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
 
       - name: Build Docker image
-        run: docker build -t devops-app:latest .
+        run: docker build -t devops-app:$IMAGE_TAG .
 
       - name: Deploy container
         run: |
@@ -33,7 +60,7 @@ jobs:
             --name devops-app \
             --restart unless-stopped \
             -p 8080:8080 \
-            devops-app:latest
+            devops-app:$IMAGE_TAG
 
       - name: Integration test
         run: |
@@ -61,7 +88,5 @@ jobs:
 
       - name: Push image to registry
         run: |
-          docker tag devops-app:latest 10.0.40.171:5000/team6/devops-app:latest
-          docker tag devops-app:latest 10.0.40.171:5000/team6/devops-app:${GITHUB_SHA::7}
-          docker push 10.0.40.171:5000/team6/devops-app:latest
-          docker push 10.0.40.171:5000/team6/devops-app:${GITHUB_SHA::7}
+          docker tag devops-app:$IMAGE_TAG $REGISTRY_IMAGE:$IMAGE_TAG
+          docker push $REGISTRY_IMAGE:$IMAGE_TAG
