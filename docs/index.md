@@ -1,5 +1,5 @@
-# Team 6 – DevOps Doku
+# Team 6 – DevOps Docs
 
-Notizen zur DevOps-LV an der FHV (WS 2026).
+Notes for the DevOps course at FHV (winter term 2026).
 
-Projekt: Spring-Boot-App mit Gradle, gebaut über GitHub Actions auf unserem self-hosted Runner (Build-Agent `10.0.40.168`).
+Project: Spring Boot app with Gradle, built with GitHub Actions on our self-hosted runner (build agent `10.0.40.168`).

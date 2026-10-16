@@ -1,10 +1,10 @@
-# Lecture 5 – Image-Tag, SonarQube, JaCoCo
+# Lecture 5 – Image tag, SonarQube, JaCoCo
 
-**Ziel:** Eindeutige Image-Tags, Code-Analyse mit SonarQube.
+**Goal:** Unique image tags, code analysis with SonarQube.
 
-## Image-Tag
+## Image tag
 
-Tag = die ersten 7 Zeichen vom Commit-Hash, damit jedes Image in der Registry eindeutig ist.
+Tag = first 7 characters of the commit hash, so every image in the registry is unique.
 
 ```bash
 echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
@@ -12,14 +12,14 @@ echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
 
 ## SonarQube
 
-- Läuft als Container auf unserem Agent: `http://10.0.40.168:9000`
-- Admin-Passwort geändert, lokales Projekt `devops-app-team6` angelegt, Token als GitHub-Secret `SONAR_TOKEN` gespeichert
+- Runs as a container on our agent: `http://10.0.40.168:9000`
+- Changed the admin password, created a local project `devops-app-team6`, stored the token as GitHub secret `SONAR_TOKEN`
 
 ## JaCoCo
 
-Plugin in `build.gradle` hinzugefügt, Report läuft nach den Tests. XML-Report muss aktiv sein, sonst kann Sonar die Coverage nicht lesen (`build/reports/jacoco/test/jacocoTestReport.xml`).
+Added the plugin to `build.gradle`, report runs after the tests. The XML report has to be enabled, otherwise Sonar can't read the coverage (`build/reports/jacoco/test/jacocoTestReport.xml`).
 
-## Erster Scan (manuell)
+## First scan (manual)
 
 ```bash
 sonar-scanner \
@@ -29,6 +29,6 @@ sonar-scanner \
   -Dsonar.token=<SONAR_TOKEN>
 ```
 
-## Scan in der Pipeline
+## Scan in the pipeline
 
-Läuft über das `sonarsource/sonar-scanner-cli`-Image mit `SONAR_HOST_URL` und `SONAR_TOKEN` als Env-Variablen. Ergebnisse dann im Sonar-Dashboard.
+Runs with the `sonarsource/sonar-scanner-cli` image, `SONAR_HOST_URL` and `SONAR_TOKEN` passed as env variables. Results show up in the Sonar dashboard.

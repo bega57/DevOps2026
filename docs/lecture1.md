@@ -1,18 +1,18 @@
-# Lecture 1 – Git, SSH, Projekt-Setup
+# Lecture 1 – Git, SSH, project setup
 
-**Ziel:** Team bilden, Repo anlegen, App erstellen.
+**Goal:** Form a team, create the repo, set up the app.
 
-- SSH-Key erstellt und Public Key an den Dozenten geschickt
-- Repo auf GitHub angelegt, Teammitglieder als Collaborators hinzugefügt
-- Spring-Boot-App über [start.spring.io](https://start.spring.io) mit Gradle generiert und gepusht
+- Created an SSH key and sent the public key to the lecturer
+- Created the GitHub repo and added team members as collaborators
+- Generated a Spring Boot app with Gradle via [start.spring.io](https://start.spring.io) and pushed it
 
-## SSH auf den Server
+## SSH to the server
 
 ```bash
 ssh -l student 10.0.40.168
 ```
 
-## Git-Basics
+## Git basics
 
 ```bash
 git clone <url>

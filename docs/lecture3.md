@@ -1,9 +1,9 @@
-# Lecture 3 – App in der Pipeline bauen
+# Lecture 3 – Building the app in the pipeline
 
-**Ziel:** App per Gradle-Container bauen, Tests laufen lassen, Dockerfile schreiben.
+**Goal:** Build the app with a Gradle container, run tests, write a Dockerfile.
 
-- Kein SDK auf dem Agent installieren, alles läuft über Docker
-- `gradle clean build` erzeugt das Fat-JAR in `build/libs/` und führt die Unit-Tests aus
+- No SDK installed on the agent, everything runs through Docker
+- `gradle clean build` creates the fat JAR in `build/libs/` and runs the unit tests
 
 ```bash
 docker run --rm \
@@ -12,7 +12,7 @@ docker run --rm \
   gradle:jdk17 gradle clean build --no-daemon
 ```
 
-`-u` ist wichtig: Docker läuft als root, ohne das gehören die Build-Files root und der nächste Checkout schlägt fehl.
+`-u` matters: Docker runs as root, so without it the build files belong to root and the next checkout fails.
 
 ## Dockerfile
 

@@ -1,10 +1,10 @@
-# Lecture 4 – Deployment & Integrationstest
+# Lecture 4 – Deployment & integration test
 
-**Ziel:** App auf dem Agent starten, testen, Image in die Registry pushen.
+**Goal:** Run the app on the agent, test it, push the image to the registry.
 
 ## Deploy
 
-Alter Container wird gestoppt und gelöscht, dann neu gestartet. `|| true`, damit der Step nicht failt, wenn noch keiner läuft.
+The old container gets stopped and removed, then a new one is started. `|| true` so the step doesn't fail if nothing is running yet.
 
 ```bash
 docker stop devops-app || true
@@ -12,13 +12,13 @@ docker rm devops-app || true
 docker run -d --name devops-app --restart unless-stopped -p 8080:8080 devops-app:$IMAGE_TAG
 ```
 
-## Integrationstest
+## Integration test
 
-Eigener Step nach dem Deploy. Erwartete Antwort steht in `integration-test/health-expected.json` und wird mit `curl` gegen `/actuator/health` verglichen. Bei Unterschied `exit 1` → Pipeline failt, kein Push.
+Separate step after the deploy. The expected response is in `integration-test/health-expected.json` and gets compared with a `curl` to `/actuator/health`. If they differ → `exit 1` → pipeline fails, no push.
 
 ## Registry
 
-Registry läuft auf `10.0.40.171:5000`.
+Registry runs on `10.0.40.171:5000`.
 
 ```bash
 docker tag devops-app:$IMAGE_TAG 10.0.40.171:5000/team6/devops-app:$IMAGE_TAG

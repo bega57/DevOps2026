@@ -1,17 +1,17 @@
-# Lecture 2 – Runner & erste Pipeline
+# Lecture 2 – Runner & first pipeline
 
-**Ziel:** Self-hosted Runner mit GitHub verbinden, erste Pipeline laufen lassen.
+**Goal:** Connect a self-hosted runner to GitHub and run a first pipeline.
 
-- Runner auf dem Build-Agent eingerichtet und mit dem Repo verbunden
-- Dozent hat den Runner als Service installiert
-- Erste Pipeline über *Actions → New workflow → Simple workflow*
+- Set up the runner on the build agent and connected it to the repo
+- Lecturer installed the runner as a service
+- First pipeline via *Actions → New workflow → Simple workflow*
 
-Test-Step:
+Test step:
 
 ```yaml
 - run: docker run --rm hello-world
 ```
 
-Den Hello-World-Step haben wir später durch den richtigen Build-Workflow ersetzt.
+We later replaced the hello-world step with the real build workflow.
 
-Ob der Runner funktioniert, sieht man in `~/actions-runner/_work` – dort landen die ausgecheckten Repos.
+To check that the runner works, look in `~/actions-runner/_work` – that's where the checked-out repos end up.
