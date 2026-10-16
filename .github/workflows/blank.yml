@@ -90,3 +90,23 @@ jobs:
         run: |
           docker tag devops-app:$IMAGE_TAG $REGISTRY_IMAGE:$IMAGE_TAG
           docker push $REGISTRY_IMAGE:$IMAGE_TAG
+
+      - name: Build docs (HTML)
+        run: |
+          docker run --rm \
+            -u $(id -u):$(id -g) \
+            -v "$PWD":/docs \
+            squidfunk/mkdocs-material:9 build
+
+      - name: Build docs image
+        run: docker build -f Dockerfile.docs -t team6-docs:0.0.1 .
+
+      - name: Deploy docs container
+        run: |
+          docker stop team6-docs || true
+          docker rm team6-docs || true
+          docker run -d \
+            --name team6-docs \
+            --restart unless-stopped \
+            -p 8081:80 \
+            team6-docs:0.0.1

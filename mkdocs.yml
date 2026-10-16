@@ -1,0 +1,15 @@
+site_name: Team 6 – DevOps Doku
+theme:
+  name: material
+use_directory_urls: false
+plugins:
+  - search
+  - offline
+nav:
+  - Home: index.md
+  - Lecture 1: lecture1.md
+  - Lecture 2: lecture2.md
+  - Lecture 3: lecture3.md
+  - Lecture 4: lecture4.md
+  - Lecture 5: lecture5.md
+  - Lecture 6: lecture6.md
