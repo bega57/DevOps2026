@@ -110,3 +110,8 @@ jobs:
             --restart unless-stopped \
             -p 8081:80 \
             team6-docs:0.0.1
+
+      - name: Push docs image
+        run: |
+          docker tag team6-docs:0.0.1 10.0.40.171:5000/team6-docs:0.0.1
+          docker push 10.0.40.171:5000/team6-docs:0.0.1
