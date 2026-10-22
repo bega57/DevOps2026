@@ -39,3 +39,4 @@ out/
 .gradle-home/
 
 site/
+src/main/resources/static/documentation.pdf

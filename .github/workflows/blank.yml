@@ -17,6 +17,28 @@ jobs:
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
 
+      - name: Build docs (HTML)
+        run: |
+          docker run --rm \
+            -u $(id -u):$(id -g) \
+            -v "$PWD":/docs \
+            squidfunk/mkdocs-material:9 build
+
+      - name: Build docs (PDF)
+        run: |
+          docker run --rm \
+            -u $(id -u):$(id -g) \
+            -v "$PWD":/data \
+            pandoc/latex:3.6 \
+            --metadata-file=docs-pdf.yaml \
+            docs/index.md $(ls docs/lecture*.md | sort -V) \
+            -o site/documentation.pdf
+
+      - name: Copy PDF into app
+        run: |
+          mkdir -p src/main/resources/static
+          cp site/documentation.pdf src/main/resources/static/
+
       - name: Gradle tasks
         run: |
           docker run --rm \
@@ -86,17 +108,13 @@ jobs:
             exit 1
           fi
 
+      - name: Check PDF in app
+        run: curl -sf -o /dev/null http://localhost:8080/documentation.pdf && echo "PDF OK"
+
       - name: Push image to registry
         run: |
           docker tag devops-app:$IMAGE_TAG $REGISTRY_IMAGE:$IMAGE_TAG
           docker push $REGISTRY_IMAGE:$IMAGE_TAG
-
-      - name: Build docs (HTML)
-        run: |
-          docker run --rm \
-            -u $(id -u):$(id -g) \
-            -v "$PWD":/docs \
-            squidfunk/mkdocs-material:9 build
 
       - name: Build docs image
         run: docker build -f Dockerfile.docs -t team6-docs:0.0.1 .

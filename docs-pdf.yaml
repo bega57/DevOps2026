@@ -1,0 +1,8 @@
+title: "Team 6 – DevOps Docs"
+toc: true
+geometry: margin=2cm
+colorlinks: true
+header-includes: |
+  ```{=latex}
+  \DeclareUnicodeCharacter{2192}{\ensuremath{\rightarrow}}
+  ```
