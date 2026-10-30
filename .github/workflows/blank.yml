@@ -133,3 +133,57 @@ jobs:
         run: |
           docker tag team6-docs:0.0.1 10.0.40.171:5000/team6-docs:0.0.1
           docker push 10.0.40.171:5000/team6-docs:0.0.1
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    env:
+      PROD_HOST: 10.0.40.173
+      PROD_USER: team6
+    steps:
+      - name: Set image tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Prepare SSH key and host key
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/ssh"
+          echo "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/ssh/id_deploy"
+          chmod 600 "$RUNNER_TEMP/ssh/id_deploy"
+          ssh-keyscan -H $PROD_HOST > "$RUNNER_TEMP/ssh/known_hosts"
+
+      - name: Deploy to production
+        run: |
+          SSH="ssh -i $RUNNER_TEMP/ssh/id_deploy -o UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts $PROD_USER@$PROD_HOST"
+
+          # Lifecycle: alte Container und Images auf Produktion entfernen
+          $SSH 'docker stop team6-app team6-docs || true'
+          $SSH 'docker rm team6-app team6-docs || true'
+          $SSH 'docker images -q team6-app | xargs -r docker rmi -f; docker rmi -f team6-docs:0.0.1 || true'
+
+          # Images vom Build-Agent per SSH auf Produktion uebertragen
+          docker tag devops-app:$IMAGE_TAG team6-app:$IMAGE_TAG
+          docker save team6-app:$IMAGE_TAG | $SSH 'docker load'
+          docker save team6-docs:0.0.1 | $SSH 'docker load'
+
+          # Container auf Produktion starten
+          $SSH "docker run -d --name team6-app --restart always -p 1861:8080 team6-app:$IMAGE_TAG"
+          $SSH "docker run -d --name team6-docs --restart always -p 1862:80 team6-docs:0.0.1"
+
+      - name: Check production
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://$PROD_HOST:1861/actuator/health > /dev/null; then
+              echo "App auf Produktion OK"
+              break
+            fi
+            echo "Warte auf App... ($i/30)"
+            sleep 2
+          done
+          curl -sf http://$PROD_HOST:1861/actuator/health
+          curl -sf -o /dev/null http://$PROD_HOST:1862 && echo "Doku auf Produktion OK"
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/ssh"
