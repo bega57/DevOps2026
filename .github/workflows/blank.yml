@@ -149,13 +149,14 @@ jobs:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
           mkdir -p "$RUNNER_TEMP/ssh"
-          echo "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/ssh/id_deploy"
+          echo "$DEPLOY_SSH_KEY" | tr -d '\r' > "$RUNNER_TEMP/ssh/id_deploy"
           chmod 600 "$RUNNER_TEMP/ssh/id_deploy"
+          ssh-keygen -y -f "$RUNNER_TEMP/ssh/id_deploy" > /dev/null && echo "SSH-Key gueltig"
           ssh-keyscan -H $PROD_HOST > "$RUNNER_TEMP/ssh/known_hosts"
 
       - name: Deploy to production
         run: |
-          SSH="ssh -i $RUNNER_TEMP/ssh/id_deploy -o UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts $PROD_USER@$PROD_HOST"
+          SSH="ssh -i $RUNNER_TEMP/ssh/id_deploy -o UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts -o BatchMode=yes $PROD_USER@$PROD_HOST"
 
           # Lifecycle: alte Container und Images auf Produktion entfernen
           $SSH 'docker stop team6-app team6-docs || true'
