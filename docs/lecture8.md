@@ -20,23 +20,23 @@ In the pipeline the key is written to `$RUNNER_TEMP` (`chmod 600`), the host key
 
 ## Deployment
 
-Our registry only speaks HTTP and production Docker doesn't accept it, so the images are sent directly through SSH:
+Production pulls the images from our registry (`10.0.40.171:5000`), the `build` job already pushed them there.
 
-```bash
-docker save team6-app:$IMAGE_TAG | $SSH 'docker load'
-```
+At first production Docker didn't accept our HTTP registry, so we sent the images with `docker save | ssh docker load`. After the registry was allowed on production we switched to `docker pull` (the old lines are still commented out in the workflow).
 
 On production (lifecycle):
 
 ```bash
 docker stop team6-app team6-docs || true
 docker rm team6-app team6-docs || true
-# remove old images, docker load ...
-docker run -d --name team6-app  --restart always -p 1861:8080 team6-app:$IMAGE_TAG
-docker run -d --name team6-docs --restart always -p 1862:80   team6-docs:0.0.1
+# remove old images
+docker pull $REGISTRY_IMAGE:$IMAGE_TAG
+docker pull 10.0.40.171:5000/team6-docs:0.0.1
+docker run -d --name team6-app  --restart always -p 1861:8080 $REGISTRY_IMAGE:$IMAGE_TAG
+docker run -d --name team6-docs --restart always -p 1862:80   10.0.40.171:5000/team6-docs:0.0.1
 ```
 
-Images are named `team6-...` because all teams share the same Docker on production.
+Containers are named `team6-...` because all teams share the same Docker on production.
 
 ## Check
 

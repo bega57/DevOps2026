@@ -140,6 +140,7 @@ jobs:
     env:
       PROD_HOST: 10.0.40.173
       PROD_USER: team6
+      DOCS_IMAGE: 10.0.40.171:5000/team6-docs:0.0.1
     steps:
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
@@ -161,16 +162,20 @@ jobs:
           # Lifecycle: alte Container und Images auf Produktion entfernen
           $SSH 'docker stop team6-app team6-docs || true'
           $SSH 'docker rm team6-app team6-docs || true'
-          $SSH 'docker images -q team6-app | xargs -r docker rmi -f; docker rmi -f team6-docs:0.0.1 || true'
+          $SSH "docker images -q $REGISTRY_IMAGE | xargs -r docker rmi -f; docker rmi -f $DOCS_IMAGE || true"
 
-          # Images vom Build-Agent per SSH auf Produktion uebertragen
-          docker tag devops-app:$IMAGE_TAG team6-app:$IMAGE_TAG
-          docker save team6-app:$IMAGE_TAG | $SSH 'docker load'
-          docker save team6-docs:0.0.1 | $SSH 'docker load'
+          # Alt: Images vom Build-Agent per SSH auf Produktion uebertragen
+          # docker tag devops-app:$IMAGE_TAG team6-app:$IMAGE_TAG
+          # docker save team6-app:$IMAGE_TAG | $SSH 'docker load'
+          # docker save team6-docs:0.0.1 | $SSH 'docker load'
+
+          # Images auf Produktion aus der Registry holen
+          $SSH "docker pull $REGISTRY_IMAGE:$IMAGE_TAG"
+          $SSH "docker pull $DOCS_IMAGE"
 
           # Container auf Produktion starten
-          $SSH "docker run -d --name team6-app --restart always -p 1861:8080 team6-app:$IMAGE_TAG"
-          $SSH "docker run -d --name team6-docs --restart always -p 1862:80 team6-docs:0.0.1"
+          $SSH "docker run -d --name team6-app --restart always -p 1861:8080 $REGISTRY_IMAGE:$IMAGE_TAG"
+          $SSH "docker run -d --name team6-docs --restart always -p 1862:80 $DOCS_IMAGE"
 
       - name: Check production
         run: |
